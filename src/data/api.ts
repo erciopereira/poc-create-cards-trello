@@ -1,4 +1,13 @@
-export function api(path: string, method: string, body?: any) {
+/* eslint-disable react-hooks/rules-of-hooks */
+import { Dispatch, SetStateAction } from "react";
+
+export async function api(
+  path: string,
+  method: string,
+  type: string,
+  setListErros: Dispatch<SetStateAction<any[]>>,
+  body?: any
+) {
   const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const apiPrefix = "/1";
   const url = new URL(apiPrefix.concat(path), baseURL);
@@ -10,5 +19,15 @@ export function api(path: string, method: string, body?: any) {
     method,
     body: body ? JSON.stringify(body) : null,
   };
-  return fetch(url, params);
+  try {
+    const response = await fetch(url, params);
+    return response;
+  } catch (err) {
+    setListErros((prev: any) => {
+      const copyList = prev;
+      copyList.push({ type });
+      return copyList;
+    });
+    return null;
+  }
 }

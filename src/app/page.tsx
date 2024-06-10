@@ -1,86 +1,92 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
-import { api } from "@/data/api";
+import { useErrorsApi } from "@/contexts/errors-api-context";
+import trelloApi from "@/data/trello";
 import moment from "moment";
 import "moment/locale/pt-br";
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 
 export default function Home() {
-  const id = process.env.NEXT_PUBLIC_TRELLO_ID;
-  const key = process.env.NEXT_PUBLIC_TRELLO_KEY;
-  const token = process.env.NEXT_PUBLIC_TRELLO_TOKEN;
-  const [excelFile, setExcelFile] = useState<any>(null);
+  const { setListErros, listErrors } = useErrorsApi();
   const [typeError, setTypeError] = useState<any>(null);
-  const [dataBoard, setDataBoard] = useState<any>({});
-  const [lists, setLists] = useState<any>([]);
+  const [lists, setLists] = useState<
+    [
+      {
+        id: string;
+        name: string;
+      }
+    ]
+  >();
   const [loading, setLoading] = useState<boolean>(false);
-
-  // submit state
+  const [idBoard, setIdBoard] = useState<string>();
+  const [listBoards, setListBoards] = useState<
+    [
+      {
+        id: string;
+        name: string;
+      }
+    ]
+  >();
+  const [idList, setIdList] = useState<string>("");
   const [excelData, setExcelData] = useState<any>(null);
+  const [nameFile, setNameFile] = useState<string>();
+  const [workbook, setWorkbook] = useState<any>();
+  const [worksheetNames, setWorksheetNames] = useState<any>();
+  const [listMembers, setListMembers] = useState<any>([]);
 
-  // onchange event
   const handleFile = (e: any) => {
+    setWorksheetNames(undefined);
+    setExcelData(null);
+    setNameFile("");
+    setWorkbook(undefined);
     let fileTypes = [
       "application/vnd.ms-excel",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "text/csv",
     ];
     let selectedFile = e.target.files[0];
+    setNameFile(selectedFile.name);
     if (selectedFile) {
       if (selectedFile && fileTypes.includes(selectedFile.type)) {
         setTypeError(null);
         let reader = new FileReader();
         reader.readAsArrayBuffer(selectedFile);
         reader.onload = (e: any) => {
-          setExcelFile(e.target.result);
+          handleGetFile(e.target.result);
         };
       } else {
         setTypeError("Please select only excel file types");
-        setExcelFile(null);
       }
     } else {
       console.log("Please select your file");
     }
   };
 
-  // submit event
-  const handleFileSubmit = (e: any) => {
-    e.preventDefault();
-    if (excelFile !== null) {
-      const workbook = XLSX.read(excelFile, { type: "buffer" });
-      const worksheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[worksheetName];
-      const data: any = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-      const newData = data.map((item: any) => {
-        if (typeof item.Data === "number") {
-          const date = new Date(Math.round((item.Data - 25569) * 86400 * 1000));
-          const newDateUTC = date.toUTCString();
-          const day = moment.utc(newDateUTC).format("dddd");
-          const dayMonth = moment.utc(newDateUTC).format("DD/MM");
-          const dateFormat = moment.utc(newDateUTC).format("YYYY-MM-DD");
-          return { ...item, Data: `${day}, ${dayMonth}`, dateRef: dateFormat };
-        }
-        return item;
-      });
-      setExcelData(newData);
+  const handleGetFile = (file: any) => {
+    if (file !== null) {
+      const excelRead = XLSX.read(file, { type: "buffer" });
+      setWorkbook(excelRead);
+      setWorksheetNames(excelRead.SheetNames);
     }
   };
 
-  async function getBoards() {
-    const reponse = await api(`/boards/${id}?key=${key}&token=${token}`, "GET");
-    const data = await reponse.json();
-    setDataBoard(data);
-    getLists(data.id);
-  }
-  async function getLists(id: string) {
-    const reponse = await api(
-      `/boards/${id}/lists?key=${key}&token=${token}`,
-      "GET"
-    );
-    const data = await reponse.json();
-    setLists(data);
-  }
+  const handleFileSubmit = (sheetName: string) => {
+    const worksheet = workbook.Sheets[sheetName];
+    const data: any = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+    const newData = data.map((item: any) => {
+      if (typeof item.Data === "number") {
+        const date = new Date(Math.round((item.Data - 25569) * 86400 * 1000));
+        const newDateUTC = date.toUTCString();
+        const day = moment.utc(newDateUTC).format("dddd");
+        const dayMonth = moment.utc(newDateUTC).format("DD/MM");
+        const dateFormat = moment.utc(newDateUTC).format("YYYY-MM-DD");
+        return { ...item, Data: `${day}, ${dayMonth}`, dateRef: dateFormat };
+      }
+      return item;
+    });
+    setExcelData(newData);
+  };
 
   async function createCard(
     content: string,
@@ -88,38 +94,21 @@ export default function Home() {
     listComents: string[],
     date: string
   ) {
-    console.log(date);
-    const idList = lists[0].id;
     const data = {
       name: `${content} - ${format}`,
     };
-    const reponse = await api(
-      `/cards?idList=${idList}&key=${key}&token=${token}`,
-      "POST",
-      data
-    );
-    const returnData = await reponse.json();
-    updateCard(returnData.id, listComents, date);
+    const reponse = await trelloApi.generateCards(idList, data, setListErros);
+    const dueDate = { due: date };
+    await trelloApi.updateCard(reponse.id, dueDate, setListErros);
+    await addComment(listComents, reponse.id);
   }
 
-  async function updateCard(id: string, listComents: string[], date: string) {
-    const data = { due: date };
-    await api(`/cards/${id}?key=${key}&token=${token}`, "PUT", data);
-    addComment(listComents, id);
-  }
-
-  async function addComment(listComents: string[], id: string) {
+  async function addComment(listComents: any, id: string) {
     for (const comment of listComents) {
-      await generateComment(comment, id);
+      const member = comment.member || "";
+      const text = `${member} ${comment.title}: ${comment.content}`;
+      await trelloApi.generateComment(text, id, setListErros);
     }
-  }
-
-  async function generateComment(comment: any, id: string) {
-    const text = `${comment.title}: ${comment.content}`;
-    await api(
-      `/cards/${id}/actions/comments?text=${text}&key=${key}&token=${token}`,
-      "POST"
-    );
   }
 
   async function gerarCard() {
@@ -139,9 +128,7 @@ export default function Home() {
             format = element[item];
             break;
           case "dateRef":
-            // const teste = moment(element[item]);
-            // const newFormatDate = teste.format("YYYY/DD/MM");
-            date = new Date(`${element[item]} 08:00`); // new Date(`${element[item]} 08:00`);
+            date = new Date(`${element[item]} 08:00`);
             break;
           case "Considerações Gustavo":
           case "Considerações Julyana":
@@ -150,12 +137,19 @@ export default function Home() {
           case "Considerações Natalia":
           case "Considerações Quésia":
           case "Referência de conteúdo":
-          case "Referência visual":
           case "Pedidos de CTA específicos":
             if (element[item] !== "")
               listComents.push({
                 title: item,
                 content: element[item],
+              });
+            break;
+          case "Referência visual":
+            if (element[item] !== "")
+              listComents.push({
+                title: item,
+                content: element[item],
+                member: "@julyanamuniz2",
               });
             break;
           default:
@@ -168,34 +162,124 @@ export default function Home() {
   }
 
   useEffect(() => {
-    getBoards();
+    (async () => {
+      const response = await trelloApi.getListBoards(setListErros);
+      setListBoards(response);
+    })();
+    (async () => {
+      const response = await trelloApi.getListMembers(setListErros);
+      setListMembers(response);
+    })();
   }, []);
 
-  console.log(excelData);
+  useEffect(() => {
+    if (idBoard) {
+      (async () => {
+        const response = await trelloApi.getLists(idBoard, setListErros);
+        setLists(response);
+      })();
+    }
+  }, [idBoard]);
 
   return (
-    <div>
-      <h1>Nome do Quadro {dataBoard?.name}</h1>
+    <div className="p-5">
+      <div className="flex gap-5">
+        <div className="flex flex-col mb-2">
+          <label>Quadros do trello</label>
+          <select
+            className="border p-2 w-48"
+            onChange={(e) => {
+              setIdBoard(e.target.value);
+              setLists(undefined);
+              setIdList("");
+            }}
+          >
+            <option value={undefined}></option>
+            {listBoards?.map((item: any) => (
+              <option key={item.id} value={item.id}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        {idBoard && (
+          <div className="flex flex-col mb-5">
+            <label>Listas do quadro</label>
+            <select
+              className="border p-2 w-48"
+              onChange={(e) => setIdList(e.target.value)}
+            >
+              <option value={undefined}></option>
+              {lists?.map((item: any) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
-      <button className="border-2 p-2 rounded" onClick={() => gerarCard()}>
-        Criar CARD
-      </button>
-      {loading && <div>Criando cards...</div>}
+        {idList !== "" && (
+          <div className="flex">
+            <div className="flex flex-col">
+              <h3>Selecionar o arquivo excel</h3>
+              <input
+                type="file"
+                required
+                onChange={handleFile}
+                className="mr-5"
+              />
+            </div>
 
-      <h3>Upload & View Excel Sheets</h3>
+            {worksheetNames && (
+              <div className="flex flex-col mb-2">
+                <label>Abas do arquivo</label>
+                <select
+                  className="border p-2 w-48"
+                  onChange={(e) => {
+                    handleFileSubmit(e.target.value);
+                  }}
+                >
+                  <option value={undefined}></option>
+                  {worksheetNames?.map((item: any) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            {typeError && <div role="alert">{typeError}</div>}
+          </div>
+        )}
+      </div>
 
-      {/* form */}
-      <form onSubmit={handleFileSubmit}>
-        <input type="file" required onChange={handleFile} />
-        <button className="border-2 p-2 rounded" type="submit">
-          UPLOAD
-        </button>
-        {typeError && <div role="alert">{typeError}</div>}
-      </form>
+      {listErrors.length ? (
+        <div className="border p-5 mb-5">
+          {listErrors.map((item, index) => (
+            <div className="mb-5" key={index}>
+              {item.type}
+            </div>
+          ))}
+        </div>
+      ) : null}
 
-      {/* view data */}
+      {excelData && nameFile && (
+        <div className="flex items-center">
+          <div className="text-xl font-bold">{nameFile}</div>
+          <div className="ml-10 self-center">
+            <button
+              className="border-2 p-1 rounded w-36"
+              onClick={() => gerarCard()}
+            >
+              Criar CARDS
+            </button>
+          </div>
+          {loading && <div>Criando cards...</div>}
+        </div>
+      )}
       <>
-        {excelData ? (
+        {excelData && (
           <>
             <div className="flex w-fit font-bold border-b-2 sticky top-0 bg-white">
               {Object.keys(excelData[0]).map((key) => (
@@ -231,8 +315,6 @@ export default function Home() {
               ))}
             </div>
           </>
-        ) : (
-          <div>No File is uploaded yet!</div>
         )}
       </>
     </div>

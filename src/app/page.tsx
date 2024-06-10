@@ -1,113 +1,240 @@
-import Image from "next/image";
+/* eslint-disable react-hooks/exhaustive-deps */
+"use client";
+import { api } from "@/data/api";
+import moment from "moment";
+import "moment/locale/pt-br";
+import { useEffect, useState } from "react";
+import * as XLSX from "xlsx";
 
 export default function Home() {
+  const id = process.env.NEXT_PUBLIC_TRELLO_ID;
+  const key = process.env.NEXT_PUBLIC_TRELLO_KEY;
+  const token = process.env.NEXT_PUBLIC_TRELLO_TOKEN;
+  const [excelFile, setExcelFile] = useState<any>(null);
+  const [typeError, setTypeError] = useState<any>(null);
+  const [dataBoard, setDataBoard] = useState<any>({});
+  const [lists, setLists] = useState<any>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  // submit state
+  const [excelData, setExcelData] = useState<any>(null);
+
+  // onchange event
+  const handleFile = (e: any) => {
+    let fileTypes = [
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "text/csv",
+    ];
+    let selectedFile = e.target.files[0];
+    if (selectedFile) {
+      if (selectedFile && fileTypes.includes(selectedFile.type)) {
+        setTypeError(null);
+        let reader = new FileReader();
+        reader.readAsArrayBuffer(selectedFile);
+        reader.onload = (e: any) => {
+          setExcelFile(e.target.result);
+        };
+      } else {
+        setTypeError("Please select only excel file types");
+        setExcelFile(null);
+      }
+    } else {
+      console.log("Please select your file");
+    }
+  };
+
+  // submit event
+  const handleFileSubmit = (e: any) => {
+    e.preventDefault();
+    if (excelFile !== null) {
+      const workbook = XLSX.read(excelFile, { type: "buffer" });
+      const worksheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[worksheetName];
+      const data: any = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+      const newData = data.map((item: any) => {
+        if (typeof item.Data === "number") {
+          const date = new Date(Math.round((item.Data - 25569) * 86400 * 1000));
+          const newDateUTC = date.toUTCString();
+          const day = moment.utc(newDateUTC).format("dddd");
+          const dayMonth = moment.utc(newDateUTC).format("DD/MM");
+          const dateFormat = moment.utc(newDateUTC).format("YYYY-MM-DD");
+          return { ...item, Data: `${day}, ${dayMonth}`, dateRef: dateFormat };
+        }
+        return item;
+      });
+      setExcelData(newData);
+    }
+  };
+
+  async function getBoards() {
+    const reponse = await api(`/boards/${id}?key=${key}&token=${token}`, "GET");
+    const data = await reponse.json();
+    setDataBoard(data);
+    getLists(data.id);
+  }
+  async function getLists(id: string) {
+    const reponse = await api(
+      `/boards/${id}/lists?key=${key}&token=${token}`,
+      "GET"
+    );
+    const data = await reponse.json();
+    setLists(data);
+  }
+
+  async function createCard(
+    content: string,
+    format: string,
+    listComents: string[],
+    date: string
+  ) {
+    console.log(date);
+    const idList = lists[0].id;
+    const data = {
+      name: `${content} - ${format}`,
+    };
+    const reponse = await api(
+      `/cards?idList=${idList}&key=${key}&token=${token}`,
+      "POST",
+      data
+    );
+    const returnData = await reponse.json();
+    updateCard(returnData.id, listComents, date);
+  }
+
+  async function updateCard(id: string, listComents: string[], date: string) {
+    const data = { due: date };
+    await api(`/cards/${id}?key=${key}&token=${token}`, "PUT", data);
+    addComment(listComents, id);
+  }
+
+  async function addComment(listComents: string[], id: string) {
+    for (const comment of listComents) {
+      await generateComment(comment, id);
+    }
+  }
+
+  async function generateComment(comment: any, id: string) {
+    const text = `${comment.title}: ${comment.content}`;
+    await api(
+      `/cards/${id}/actions/comments?text=${text}&key=${key}&token=${token}`,
+      "POST"
+    );
+  }
+
+  async function gerarCard() {
+    setLoading(true);
+    for (const element of excelData) {
+      let content: string = "";
+      let format: string = "";
+      let date: any = "";
+      const listComents: any = [];
+      const obj: any = Object.keys(element);
+      obj.forEach((item: any) => {
+        switch (item) {
+          case "Conteúdo":
+            content = element[item];
+            break;
+          case "Formato":
+            format = element[item];
+            break;
+          case "dateRef":
+            // const teste = moment(element[item]);
+            // const newFormatDate = teste.format("YYYY/DD/MM");
+            date = new Date(`${element[item]} 08:00`); // new Date(`${element[item]} 08:00`);
+            break;
+          case "Considerações Gustavo":
+          case "Considerações Julyana":
+          case "Considerações Maila":
+          case "Considerações Marilia":
+          case "Considerações Natalia":
+          case "Considerações Quésia":
+          case "Referência de conteúdo":
+          case "Referência visual":
+          case "Pedidos de CTA específicos":
+            if (element[item] !== "")
+              listComents.push({
+                title: item,
+                content: element[item],
+              });
+            break;
+          default:
+            break;
+        }
+      });
+      await createCard(content, format, listComents, date);
+    }
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    getBoards();
+  }, []);
+
+  console.log(excelData);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+    <div>
+      <h1>Nome do Quadro {dataBoard?.name}</h1>
 
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+      <button className="border-2 p-2 rounded" onClick={() => gerarCard()}>
+        Criar CARD
+      </button>
+      {loading && <div>Criando cards...</div>}
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+      <h3>Upload & View Excel Sheets</h3>
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+      {/* form */}
+      <form onSubmit={handleFileSubmit}>
+        <input type="file" required onChange={handleFile} />
+        <button className="border-2 p-2 rounded" type="submit">
+          UPLOAD
+        </button>
+        {typeError && <div role="alert">{typeError}</div>}
+      </form>
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+      {/* view data */}
+      <>
+        {excelData ? (
+          <>
+            <div className="flex w-fit font-bold border-b-2 sticky top-0 bg-white">
+              {Object.keys(excelData[0]).map((key) => (
+                <div className="w-64 p-4" key={key}>
+                  {key}
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-col w-fit">
+              {excelData.map((individualExcelData: any, index: any) => (
+                <div key={index} className="flex border-b-2">
+                  {Object.keys(individualExcelData).map((key) => {
+                    const verifyUrl = () => {
+                      try {
+                        return Boolean(new URL(individualExcelData[key]));
+                      } catch (e) {
+                        return "";
+                      }
+                    };
+                    const isUrl = verifyUrl();
+                    return (
+                      <div
+                        className={`w-64 ${
+                          isUrl && "break-all"
+                        } border-r-2 p-4`}
+                        key={key}
+                      >
+                        {individualExcelData[key]}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div>No File is uploaded yet!</div>
+        )}
+      </>
+    </div>
   );
 }

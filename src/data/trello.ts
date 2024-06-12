@@ -9,55 +9,36 @@ const idOrganization = process.env.NEXT_PUBLIC_TRELLO_ID_ORGANIZATION;
 const concatKeyToken = `key=${key}&token=${token}`;
 
 export default {
-  getListBoards: async (
-    setListErros: Dispatch<SetStateAction<any[]>>
-  ): Promise<any> => {
-    const response = await api(
-      `/organizations/${idOrganization}/boards?${concatKeyToken}`,
-      "GET",
-      "Erro ao Listar Quadros",
-      setListErros
-    );
+  getListBoards: async (): Promise<any> => {
+    const response = await api({
+      path: `/organizations/${idOrganization}/boards?${concatKeyToken}`,
+      method: "GET",
+      type: "Erro ao Listar Quadros",
+    });
     const data = await response?.json();
     return data || [];
   },
-  getLists: async (
-    idBoard: string,
-    setListErros: Dispatch<SetStateAction<any[]>>
-  ): Promise<any> => {
-    const reponse = await api(
-      `/boards/${idBoard}/lists?${concatKeyToken}`,
-      "GET",
-      "Erro ao listar as listas do quadro",
-      setListErros
-    );
+  getLists: async (idBoard: string): Promise<any> => {
+    const reponse = await api({
+      path: `/boards/${idBoard}/lists?${concatKeyToken}`,
+      method: "GET",
+      type: "Erro ao listar as listas do quadro",
+    });
     const data = await reponse?.json();
     return data || [];
   },
-  getListMembers: async (
-    setListErros: Dispatch<SetStateAction<any[]>>
-  ): Promise<any> => {
-    const response = await api(
-      `/organizations/${idOrganization}/members?${concatKeyToken}`,
-      "GET",
-      "Erro ao Listar Membros",
-      setListErros
-    );
-    const data = await response?.json();
-    return data || [];
-  },
   generateCards: async (
-    idList: string,
+    idList: string | undefined,
     data: any,
     setListErros: Dispatch<SetStateAction<any[]>>
   ): Promise<any> => {
-    const reponse = await api(
-      `/cards?idList=${idList}&${concatKeyToken}`,
-      "POST",
-      `Erro ao gerar o Card ${data.name}`,
+    const reponse = await api({
+      path: `/cards?idList=${idList}&${concatKeyToken}`,
+      method: "POST",
+      type: `Erro ao gerar o Card ${data.name}`,
       setListErros,
-      data
-    );
+      body: data,
+    });
     const returnData = await reponse?.json();
     return returnData || {};
   },
@@ -66,24 +47,24 @@ export default {
     data: any,
     setListErros: Dispatch<SetStateAction<any[]>>
   ): Promise<any> => {
-    await api(
-      `/cards/${id}?${concatKeyToken}`,
-      "PUT",
-      `Erro ao criar a data de finalização ${data.due}`,
+    await api({
+      path: `/cards/${id}?${concatKeyToken}`,
+      method: "PUT",
+      type: `Erro ao criar a data de finalização ${data.due}`,
       setListErros,
-      data
-    );
+      body: data,
+    });
   },
   generateComment: async (
     text: string,
     id: any,
     setListErros: Dispatch<SetStateAction<any[]>>
   ): Promise<any> => {
-    await api(
-      `/cards/${id}/actions/comments?text=${text}&${concatKeyToken}`,
-      "POST",
-      `Erro ao gerar o comentário: ${text}`,
-      setListErros
-    );
+    await api({
+      path: `/cards/${id}/actions/comments?text=${text}&${concatKeyToken}`,
+      method: "POST",
+      type: `Erro ao gerar o comentário: ${text}`,
+      setListErros,
+    });
   },
 };

@@ -2,6 +2,7 @@ import { useErrorsApi } from "@/contexts/errors-api-context";
 import trelloApi from "@/data/trello";
 import { Spinner } from "@chakra-ui/react";
 import { Dispatch, SetStateAction, useState } from "react";
+
 interface GenerateCardsProps {
   excelData: any;
   nameFile: string | undefined;
@@ -28,7 +29,7 @@ export function GenerateCards({
   setActiveStep,
 }: GenerateCardsProps) {
   const [loading, setLoading] = useState<boolean>(false);
-  const { setListErros } = useErrorsApi();
+  const { setListErros, sheetName } = useErrorsApi();
 
   async function createCard(
     content: string,
@@ -112,6 +113,10 @@ export function GenerateCards({
         </div>
         <div className="text-xl">
           Nome do arquivo: <span className="font-bold">{nameFile}</span>
+        </div>
+        <div className="text-xl">
+          Aba selecionada do arquivo:{" "}
+          <span className="font-bold">{sheetName}</span>
         </div>
         {!loading && (
           <button

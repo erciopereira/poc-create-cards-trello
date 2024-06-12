@@ -1,3 +1,4 @@
+import { useErrorsApi } from "@/contexts/errors-api-context";
 import moment from "moment";
 import { Dispatch, SetStateAction } from "react";
 import * as XLSX from "xlsx";
@@ -17,7 +18,9 @@ export function SelectSheet({
   nameFile,
   setActiveStep,
 }: SelectSheetProps) {
+  const { setSheetName } = useErrorsApi();
   const handleFileSubmit = (sheetName: string) => {
+    setSheetName(sheetName);
     const worksheet = workbook.Sheets[sheetName];
     const data: any = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
     const newData = data.map((item: any) => {

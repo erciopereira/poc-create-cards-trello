@@ -17,14 +17,19 @@ interface Erros {
 interface ErrorApiContextType {
   listErrors: Erros[];
   setListErros: Dispatch<SetStateAction<Erros[]>>;
+  sheetName: string;
+  setSheetName: Dispatch<SetStateAction<string>>;
 }
 
 const ErrosApiContext = createContext({} as ErrorApiContextType);
 
 export function ErrosApiProvider({ children }: { children: ReactNode }) {
   const [listErrors, setListErros] = useState<Erros[]>([]);
+  const [sheetName, setSheetName] = useState<string>("");
   return (
-    <ErrosApiContext.Provider value={{ listErrors, setListErros }}>
+    <ErrosApiContext.Provider
+      value={{ listErrors, setListErros, sheetName, setSheetName }}
+    >
       {children}
     </ErrosApiContext.Provider>
   );

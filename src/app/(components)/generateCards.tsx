@@ -96,7 +96,7 @@ export function GenerateCards({
             break;
           case "Collab vivi":
           case "Perfil vivi":
-            additionalTitle = `${item}: ${element[item]}`;
+            additionalTitle = element[item] ? `${item}: ${element[item]}` : "";
             break;
           default:
             break;

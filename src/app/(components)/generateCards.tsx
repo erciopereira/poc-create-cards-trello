@@ -53,7 +53,7 @@ export function GenerateCards({
   async function addComment(listComents: any, id: string) {
     for (const comment of listComents) {
       const member = comment.member || "";
-      const text = `${member} ${comment.title}: ${comment.content}`;
+      const text = `${member} ${comment.title} ${comment.content}`;
       await trelloApi.generateComment(text, id, setListErros);
     }
   }
@@ -90,11 +90,14 @@ export function GenerateCards({
           case "Referência de conteúdo":
           case "Pedidos de CTA específicos":
           case "Referência visual":
-            if (element[item] !== "")
+            if (element[item] !== "") {
+              const teste = `${item}: \n\n`;
               listComents.push({
-                title: item,
-                content: element[item],
+                title: encodeURIComponent(teste),
+                content: encodeURIComponent(element[item]),
               });
+            }
+
             break;
           case "Collab vivi":
           case "Perfil vivi":

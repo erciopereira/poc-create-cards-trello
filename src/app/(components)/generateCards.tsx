@@ -36,10 +36,11 @@ export function GenerateCards({
     format: string,
     listComents: string[],
     date: string,
-    dateTitle: string
+    dateTitle: string,
+    additionalTitle: string
   ) {
     const data = {
-      name: `${dateTitle} - ${content} - ${format}`,
+      name: `${dateTitle} - ${content} - ${format} - ${additionalTitle}`,
     };
     const reponse = await trelloApi.generateCards(list?.id, data, setListErros);
     const dueDate = { due: date };
@@ -62,6 +63,7 @@ export function GenerateCards({
       let format: string = "";
       let date: any = "";
       let dateTitle: string = "";
+      let additionalTitle: string = "";
       const listComents: any = [];
       const obj: any = Object.keys(element);
       obj.forEach((item: any) => {
@@ -86,19 +88,28 @@ export function GenerateCards({
           case "Referência de conteúdo":
           case "Pedidos de CTA específicos":
           case "Referência visual":
-          case "Collab vivi":
-          case "Perfil vivi":
             if (element[item] !== "")
               listComents.push({
                 title: item,
                 content: element[item],
               });
             break;
+          case "Collab vivi":
+          case "Perfil vivi":
+            additionalTitle = `${item}: ${element[item]}`;
+            break;
           default:
             break;
         }
       });
-      await createCard(content, format, listComents, date, dateTitle);
+      await createCard(
+        content,
+        format,
+        listComents,
+        date,
+        dateTitle,
+        additionalTitle
+      );
     }
     setLoading(false);
     setActiveStep(7);

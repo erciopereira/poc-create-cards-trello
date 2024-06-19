@@ -35,10 +35,11 @@ export function GenerateCards({
     content: string,
     format: string,
     listComents: string[],
-    date: string
+    date: string,
+    dateTitle: string
   ) {
     const data = {
-      name: `${content} - ${format}`,
+      name: `${dateTitle} - ${content} - ${format}`,
     };
     const reponse = await trelloApi.generateCards(list?.id, data, setListErros);
     const dueDate = { due: date };
@@ -60,6 +61,7 @@ export function GenerateCards({
       let content: string = "";
       let format: string = "";
       let date: any = "";
+      let dateTitle: string = "";
       const listComents: any = [];
       const obj: any = Object.keys(element);
       obj.forEach((item: any) => {
@@ -69,6 +71,9 @@ export function GenerateCards({
             break;
           case "Formato":
             format = element[item];
+            break;
+          case "dateTitle":
+            dateTitle = element[item];
             break;
           case "dateRef":
             date = new Date(
@@ -93,7 +98,7 @@ export function GenerateCards({
             break;
         }
       });
-      await createCard(content, format, listComents, date);
+      await createCard(content, format, listComents, date, dateTitle);
     }
     setLoading(false);
     setActiveStep(7);

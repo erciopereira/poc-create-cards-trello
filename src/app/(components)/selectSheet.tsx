@@ -30,7 +30,12 @@ export function SelectSheet({
         const day = moment.utc(newDateUTC).format("dddd");
         const dayMonth = moment.utc(newDateUTC).format("DD/MM");
         const dateFormat = moment.utc(newDateUTC).format("YYYY-MM-DD");
-        return { ...item, Data: `${day}, ${dayMonth}`, dateRef: dateFormat };
+        return {
+          ...item,
+          Data: `${day}, ${dayMonth}`,
+          dateRef: dateFormat,
+          dateTitle: dayMonth,
+        };
       }
       return item;
     });

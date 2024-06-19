@@ -21,7 +21,7 @@ export default function Home() {
     { title: "Selecionar lista" },
     { title: "Carregar arquivo de excel" },
     { title: "Selecionar aba do arquivo" },
-    { title: "Dados do arquivo carregados" },
+    { title: "Dados do arquivo carregado" },
     { title: "Criar cards" },
     { title: "Cards gerados" },
   ];
@@ -32,12 +32,20 @@ export default function Home() {
   });
 
   return (
-    <div className="m-5 flex">
+    <div className="m-5 flex gap-5">
       <div className="h-stepper-height border-r w-80">
         <Stepper activeStep={activeStep} steps={steps} />
       </div>
-      <div className="flex items-center justify-center w-full">
-        <div className="flex gap-5">
+      <div className="flex items-center justify-center w-content-view">
+        {(activeStep > 0 || activeStep > 7) && (
+          <div
+            className="absolute cursor-pointer top-0 left-[345px]"
+            onClick={() => setActiveStep((prev: number) => prev - 1)}
+          >
+            {`< Voltar`}
+          </div>
+        )}
+        <div className="flex">
           {activeStep === 0 && (
             <SelectBoard setBoard={setBoard} setActiveStep={setActiveStep} />
           )}

@@ -48,7 +48,7 @@ export function SelectList({
           Selecione em qual lista deseja abrir os cards
         </div>
         {loading && <div>Carregando quadros...</div>}
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-col">
           {lists?.map((item: any) => (
             <button
               className="border p-2 rounded bg-base text-white hover:bg-hover"

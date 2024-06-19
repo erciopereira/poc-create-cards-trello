@@ -13,7 +13,7 @@ export function ContentView({
 }: ContentViewProps) {
   return (
     excelData && (
-      <div className="w-content-view overflow-auto h-content-height">
+      <div className="overflow-auto h-content-height mt-6">
         <div className="flex items-center">
           <div className="text-xl font-bold">{nameFile}</div>
           <div className="ml-10">

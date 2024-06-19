@@ -41,7 +41,7 @@ export function SelectBoard({ setBoard, setActiveStep }: SelectBoardProps) {
         Selecione o quadro do trello que você deseja trabalhar
       </div>
       {loading && <div>Carregando quadros...</div>}
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2">
         {listBoards?.map((item: any) => (
           <button
             className="border p-2 rounded bg-base text-white hover:bg-hover"

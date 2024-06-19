@@ -73,15 +73,13 @@ export function GenerateCards({
           case "dateRef":
             date = new Date(`${element[item]} 08:00`);
             break;
-          case "Considerações Gustavo":
           case "Considerações Julyana":
-          case "Considerações Maila":
-          case "Considerações Marilia":
-          case "Considerações Natalia":
-          case "Considerações Quésia":
           case "Referência de conteúdo":
           case "Pedidos de CTA específicos":
           case "Referência visual":
+          case "Collab vivi":
+          case "Conteúdo Perfil VRS":
+          case "Conteúdo Perfil Vivi":
             if (element[item] !== "")
               listComents.push({
                 title: item,
@@ -106,17 +104,19 @@ export function GenerateCards({
           Confirme os dados para geração dos Cards
         </div>
         <div className="text-xl">
-          Quadro: <span className="font-bold">{board?.name}</span>
-        </div>
-        <div className="text-xl">
-          Lista: <span className="font-bold">{list?.name}</span>
-        </div>
-        <div className="text-xl">
-          Nome do arquivo: <span className="font-bold">{nameFile}</span>
-        </div>
-        <div className="text-xl">
-          Aba selecionada do arquivo:{" "}
-          <span className="font-bold">{sheetName}</span>
+          <div>
+            Quadro: <span className="font-bold">{board?.name}</span>
+          </div>
+          <div>
+            Lista: <span className="font-bold">{list?.name}</span>
+          </div>
+          <div>
+            Nome do arquivo: <span className="font-bold">{nameFile}</span>
+          </div>
+          <div>
+            Aba selecionada do arquivo:{" "}
+            <span className="font-bold">{sheetName}</span>
+          </div>
         </div>
         {!loading && (
           <button

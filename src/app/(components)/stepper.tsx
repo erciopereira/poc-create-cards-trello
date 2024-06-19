@@ -29,9 +29,6 @@ export function Stepper({ activeStep, steps }: StepperProps) {
             <StepperComponent.StepTitle>
               {step.title}
             </StepperComponent.StepTitle>
-            {/* <StepperComponent.StepTitle>
-              {step.description}
-            </StepperComponent.StepTitle> */}
           </StepperComponent.Box>
 
           <StepperComponent.StepSeparator />

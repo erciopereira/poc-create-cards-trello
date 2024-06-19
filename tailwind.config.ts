@@ -17,7 +17,7 @@ const config: Config = {
       },
       height: {
         "stepper-height": "calc(100vh - 3.25rem)",
-        "content-height": "calc(100vh - 40px)",
+        "content-height": "calc(100vh - 65px)",
         "errors-height": "calc(100vh - 60px)",
       },
       width: {

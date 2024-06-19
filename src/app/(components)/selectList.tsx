@@ -45,7 +45,7 @@ export function SelectList({
     idBoard && (
       <div className="flex flex-col items-center">
         <div className="text-xl mb-4">
-          Selecione em qual lista deseja abrir os cards
+          Selecione em qual coluna deseja abrir os cards
         </div>
         {loading && <div>Carregando quadros...</div>}
         <div className="flex gap-2 flex-col">

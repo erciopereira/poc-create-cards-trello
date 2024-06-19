@@ -22,7 +22,7 @@ export default {
     const reponse = await api({
       path: `/boards/${idBoard}/lists?${concatKeyToken}`,
       method: "GET",
-      type: "Erro ao listar as listas do quadro",
+      type: "Erro ao listar as colunas do quadro",
     });
     const data = await reponse?.json();
     return data || [];

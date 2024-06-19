@@ -37,7 +37,7 @@ export default function Home() {
         <Stepper activeStep={activeStep} steps={steps} />
       </div>
       <div className="flex items-center justify-center w-content-view">
-        {(activeStep > 0 || activeStep === 7) && (
+        {(activeStep > 0 || activeStep < 7) && (
           <div
             className="absolute cursor-pointer top-0 left-[345px]"
             onClick={() => setActiveStep((prev: number) => prev - 1)}

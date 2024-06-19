@@ -71,7 +71,11 @@ export function GenerateCards({
             format = element[item];
             break;
           case "dateRef":
-            date = new Date(`${element[item]} 08:00`);
+            date = new Date(
+              sheetName === "Linkedin"
+                ? `${element[item]} 07:30`
+                : `${element[item]} 08:00`
+            );
             break;
           case "Considerações Julyana":
           case "Referência de conteúdo":

@@ -82,8 +82,7 @@ export function GenerateCards({
           case "Pedidos de CTA específicos":
           case "Referência visual":
           case "Collab vivi":
-          case "Conteúdo Perfil VRS":
-          case "Conteúdo Perfil Vivi":
+          case "Perfil vivi":
             if (element[item] !== "")
               listComents.push({
                 title: item,

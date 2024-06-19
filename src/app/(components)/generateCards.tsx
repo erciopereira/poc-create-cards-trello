@@ -40,7 +40,9 @@ export function GenerateCards({
     additionalTitle: string
   ) {
     const data = {
-      name: `${dateTitle} - ${content} - ${format} - ${additionalTitle}`,
+      name: `${dateTitle} - ${content} ${format !== "" ? `- ${format}` : ""} ${
+        additionalTitle !== "" ? `- ${additionalTitle}` : ""
+      }`,
     };
     const reponse = await trelloApi.generateCards(list?.id, data, setListErros);
     const dueDate = { due: date };

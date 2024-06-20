@@ -91,9 +91,9 @@ export function GenerateCards({
           case "Pedidos de CTA específicos":
           case "Referência visual":
             if (element[item] !== "") {
-              const teste = `${item}: \n\n`;
+              const createTitle = `**${item}:** \n\n`;
               listComents.push({
-                title: encodeURIComponent(teste),
+                title: encodeURIComponent(createTitle),
                 content: encodeURIComponent(element[item]),
               });
             }

@@ -89,7 +89,6 @@ export function GenerateCards({
           case "Considerações Julyana":
           case "Referência de conteúdo":
           case "Pedidos de CTA específicos":
-          case "Referência visual":
             if (element[item] !== "") {
               const createTitle = `**${item}:** \n\n`;
               listComents.push({
@@ -102,6 +101,15 @@ export function GenerateCards({
           case "Collab vivi":
           case "Perfil vivi":
             additionalTitle = element[item] ? `${item}: ${element[item]}` : "";
+            break;
+          case "Referência visual":
+            if (element[item] !== "") {
+              const createTitle = `@aquesiafernandes\n\n **${item}:** \n\n`;
+              listComents.push({
+                title: encodeURIComponent(createTitle),
+                content: encodeURIComponent(element[item]),
+              });
+            }
             break;
           default:
             break;

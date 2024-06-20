@@ -120,8 +120,6 @@ export function GenerateCards({
     setActiveStep(7);
   }
 
-  console.log("teste");
-
   return (
     excelData &&
     nameFile && (

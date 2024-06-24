@@ -1,4 +1,4 @@
-import { ErrosApiProvider } from "@/contexts/errors-api-context";
+import { GeneralContextProvider } from "@/contexts/context";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -19,9 +19,9 @@ export default function RootLayout({
   return (
     <html lang="pt-br">
       <body className={inter.className}>
-        <ErrosApiProvider>
+        <GeneralContextProvider>
           <Providers>{children}</Providers>
-        </ErrosApiProvider>
+        </GeneralContextProvider>
       </body>
     </html>
   );

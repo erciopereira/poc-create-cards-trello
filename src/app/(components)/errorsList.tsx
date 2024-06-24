@@ -1,9 +1,9 @@
-import { useErrorsApi } from "@/contexts/errors-api-context";
+import { useGeneralContext } from "@/contexts/context";
 
 interface ListErrorsProps {}
 
 export function ListErrors({}: ListErrorsProps) {
-  const { listErrors } = useErrorsApi();
+  const { listErrors } = useGeneralContext();
   return listErrors.length ? (
     <div className="h-errors-height p-5 mb-5">
       <>

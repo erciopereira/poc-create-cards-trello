@@ -1,25 +1,13 @@
+import { useGeneralContext } from "@/contexts/context";
 import trelloApi from "@/data/trello";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 interface SelectListProps {
-  idBoard: string | undefined;
-  setList: Dispatch<
-    SetStateAction<
-      | {
-          id: string;
-          name: string;
-        }
-      | undefined
-    >
-  >;
   setActiveStep: Dispatch<SetStateAction<number>>;
 }
 
-export function SelectList({
-  idBoard,
-  setList,
-  setActiveStep,
-}: SelectListProps) {
+export function SelectList({ setActiveStep }: SelectListProps) {
+  const { member, board, setList, setSteps } = useGeneralContext();
   const [loading, setLoading] = useState(false);
   const [lists, setLists] = useState<
     [
@@ -31,18 +19,19 @@ export function SelectList({
   >();
 
   useEffect(() => {
-    if (idBoard) {
+    if (board.id) {
       (async () => {
         setLoading(true);
-        const response = await trelloApi.getLists(idBoard);
+        const response = await trelloApi.getLists(member.userName, board.id);
         setLists(response);
         setLoading(false);
       })();
     }
-  }, [idBoard]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [board.id]);
 
   return (
-    idBoard && (
+    board.id && (
       <div className="flex flex-col items-center">
         <div className="text-xl mb-4">
           Selecione em qual coluna deseja abrir os cards
@@ -55,7 +44,13 @@ export function SelectList({
               key={item.id}
               onClick={() => {
                 setList({ id: item.id, name: item.name });
-                setActiveStep(2);
+                setActiveStep((prev) => {
+                  setSteps((prevStep) => {
+                    prevStep[prev].description = item.name;
+                    return prevStep;
+                  });
+                  return prev + 1;
+                });
               }}
             >
               {item.name}

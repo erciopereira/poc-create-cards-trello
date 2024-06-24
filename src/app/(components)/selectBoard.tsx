@@ -1,21 +1,15 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
+import { useGeneralContext } from "@/contexts/context";
 import trelloApi from "@/data/trello";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 interface SelectBoardProps {
-  setBoard: Dispatch<
-    SetStateAction<
-      | {
-          id: string;
-          name: string;
-        }
-      | undefined
-    >
-  >;
   setActiveStep: Dispatch<SetStateAction<number>>;
 }
 
-export function SelectBoard({ setBoard, setActiveStep }: SelectBoardProps) {
+export function SelectBoard({ setActiveStep }: SelectBoardProps) {
+  const { member, setBoard, setSteps } = useGeneralContext();
   const [loading, setLoading] = useState(false);
   const [listBoards, setListBoards] = useState<
     [
@@ -29,7 +23,7 @@ export function SelectBoard({ setBoard, setActiveStep }: SelectBoardProps) {
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const response = await trelloApi.getListBoards();
+      const response = await trelloApi.getListBoards(member.userName);
       setListBoards(response);
       setLoading(false);
     })();
@@ -48,7 +42,13 @@ export function SelectBoard({ setBoard, setActiveStep }: SelectBoardProps) {
             key={item.id}
             onClick={() => {
               setBoard({ id: item.id, name: item.name });
-              setActiveStep(1);
+              setActiveStep((prev) => {
+                setSteps((prevStep) => {
+                  prevStep[prev].description = item.name;
+                  return prevStep;
+                });
+                return prev + 1;
+              });
             }}
           >
             {item.name}

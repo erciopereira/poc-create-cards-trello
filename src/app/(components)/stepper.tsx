@@ -1,13 +1,12 @@
+import { useGeneralContext } from "@/contexts/context";
 import * as StepperComponent from "@chakra-ui/react";
 
 interface StepperProps {
   activeStep: number;
-  steps: {
-    title: string;
-  }[];
 }
 
-export function Stepper({ activeStep, steps }: StepperProps) {
+export function Stepper({ activeStep }: StepperProps) {
+  const { steps } = useGeneralContext();
   return (
     <StepperComponent.Stepper
       index={activeStep}
@@ -29,6 +28,9 @@ export function Stepper({ activeStep, steps }: StepperProps) {
             <StepperComponent.StepTitle>
               {step.title}
             </StepperComponent.StepTitle>
+            <StepperComponent.StepDescription>
+              {step.description}
+            </StepperComponent.StepDescription>
           </StepperComponent.Box>
 
           <StepperComponent.StepSeparator />

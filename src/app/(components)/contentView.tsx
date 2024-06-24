@@ -1,16 +1,12 @@
+import { useGeneralContext } from "@/contexts/context";
 import { Dispatch, SetStateAction } from "react";
 
 interface ContentViewProps {
-  excelData: any;
-  nameFile: string | undefined;
   setActiveStep: Dispatch<SetStateAction<number>>;
 }
 
-export function ContentView({
-  excelData,
-  nameFile,
-  setActiveStep,
-}: ContentViewProps) {
+export function ContentView({ setActiveStep }: ContentViewProps) {
+  const { excelData, nameFile } = useGeneralContext();
   return (
     excelData && (
       <div className="overflow-auto h-content-height mt-6">
@@ -19,7 +15,7 @@ export function ContentView({
           <div className="ml-10">
             <button
               className="border p-2 rounded bg-base text-white hover:bg-hover"
-              onClick={() => setActiveStep(5)}
+              onClick={() => setActiveStep((prev) => prev + 1)}
             >
               Preparar CARDS
             </button>
@@ -46,8 +42,11 @@ export function ContentView({
                 const isUrl = verifyUrl();
                 return (
                   <div
-                    className={`w-64 ${isUrl && "break-all"} border-r-2 p-4`}
+                    className={`w-64 ${
+                      isUrl && "break-all"
+                    } border-r-2 p-4 truncate`}
                     key={key}
+                    title={individualExcelData[key]}
                   >
                     {individualExcelData[key]}
                   </div>

@@ -1,24 +1,21 @@
-import { useErrorsApi } from "@/contexts/errors-api-context";
+import { useGeneralContext } from "@/contexts/context";
 import moment from "moment";
 import { Dispatch, SetStateAction } from "react";
 import * as XLSX from "xlsx";
 
 interface SelectSheetProps {
-  worksheetNames: any;
-  workbook: any;
-  setExcelData: Dispatch<any>;
-  nameFile: string | undefined;
   setActiveStep: Dispatch<SetStateAction<number>>;
 }
 
-export function SelectSheet({
-  worksheetNames,
-  workbook,
-  setExcelData,
-  nameFile,
-  setActiveStep,
-}: SelectSheetProps) {
-  const { setSheetName } = useErrorsApi();
+export function SelectSheet({ setActiveStep }: SelectSheetProps) {
+  const {
+    setSheetName,
+    setSteps,
+    workbook,
+    setExcelData,
+    worksheetNames,
+    nameFile,
+  } = useGeneralContext();
   const handleFileSubmit = (sheetName: string) => {
     setSheetName(sheetName);
     const worksheet = workbook.Sheets[sheetName];
@@ -40,7 +37,13 @@ export function SelectSheet({
       return item;
     });
     setExcelData(newData);
-    setActiveStep(4);
+    setActiveStep((prev) => {
+      setSteps((prevStep) => {
+        prevStep[prev].description = sheetName;
+        return prevStep;
+      });
+      return prev + 1;
+    });
   };
 
   return (

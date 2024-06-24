@@ -1,27 +1,22 @@
+import { useGeneralContext } from "@/contexts/context";
 import "moment/locale/pt-br";
 import { Dispatch, SetStateAction, useState } from "react";
 import * as XLSX from "xlsx";
-import { SelectSheet } from "./selectSheet";
 
 interface UploadFileProps {
-  idList: string | undefined;
-  setExcelData: Dispatch<any>;
-  setNameFile: Dispatch<SetStateAction<string | undefined>>;
   setActiveStep: Dispatch<SetStateAction<number>>;
-  activeStep: number;
-  nameFile: string | undefined;
 }
 
-export function UploadFile({
-  idList,
-  setExcelData,
-  setNameFile,
-  setActiveStep,
-  activeStep,
-  nameFile,
-}: UploadFileProps) {
-  const [workbook, setWorkbook] = useState<any>();
-  const [worksheetNames, setWorksheetNames] = useState<any>();
+export function UploadFile({ setActiveStep }: UploadFileProps) {
+  const {
+    setExcelData,
+    setNameFile,
+    list,
+    setSteps,
+    setWorksheetNames,
+    setWorkbook,
+  } = useGeneralContext();
+
   const [typeError, setTypeError] = useState<any>(null);
 
   const handleFile = (e: any) => {
@@ -42,7 +37,7 @@ export function UploadFile({
         let reader = new FileReader();
         reader.readAsArrayBuffer(selectedFile);
         reader.onload = (e: any) => {
-          handleGetFile(e.target.result);
+          handleGetFile(e.target.result, selectedFile.name);
         };
       } else {
         setTypeError("Please select only excel file types");
@@ -52,48 +47,40 @@ export function UploadFile({
     }
   };
 
-  const handleGetFile = (file: any) => {
+  const handleGetFile = (file: any, name: string) => {
     if (file !== null) {
       const excelRead = XLSX.read(file, { type: "buffer" });
       setWorkbook(excelRead);
       setWorksheetNames(excelRead.SheetNames);
-      setActiveStep(3);
+      setActiveStep((prev) => {
+        setSteps((prevStep) => {
+          prevStep[prev].description = name;
+          return prevStep;
+        });
+        return prev + 1;
+      });
     }
   };
 
   return (
-    idList && (
+    list.id && (
       <div className="flex flex-col items-center">
-        {activeStep === 2 && (
-          <>
-            <div className="text-xl mb-4">Selecionar o arquivo excel</div>
-            <div className="flex flex-col">
-              <label
-                htmlFor="arquivo"
-                className="bg-base p-2 w-56 text-white text-center cursor-pointer hover:bg-hover"
-              >
-                Carregar arquivo
-              </label>
-              <input
-                type="file"
-                name="arquivo"
-                id="arquivo"
-                required
-                onChange={handleFile}
-              />
-            </div>
-          </>
-        )}
-
-        {activeStep === 3 && (
-          <SelectSheet
-            worksheetNames={worksheetNames}
-            workbook={workbook}
-            setExcelData={setExcelData}
-            nameFile={nameFile}
-            setActiveStep={setActiveStep}
+        <div className="text-xl mb-4">Selecionar o arquivo excel</div>
+        <div className="flex flex-col">
+          <label
+            htmlFor="arquivo"
+            className="bg-base p-2 w-56 text-white text-center cursor-pointer hover:bg-hover"
+          >
+            Carregar arquivo
+          </label>
+          <input
+            type="file"
+            name="arquivo"
+            id="arquivo"
+            required
+            onChange={handleFile}
           />
-        )}
+        </div>
         {typeError && <div role="alert">{typeError}</div>}
       </div>
     )

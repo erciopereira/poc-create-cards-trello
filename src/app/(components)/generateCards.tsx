@@ -1,35 +1,16 @@
-import { useErrorsApi } from "@/contexts/errors-api-context";
+import { useGeneralContext } from "@/contexts/context";
 import trelloApi from "@/data/trello";
 import { Spinner } from "@chakra-ui/react";
 import { Dispatch, SetStateAction, useState } from "react";
 
 interface GenerateCardsProps {
-  excelData: any;
-  nameFile: string | undefined;
-  list:
-    | {
-        id: string;
-        name: string;
-      }
-    | undefined;
-  board:
-    | {
-        id: string;
-        name: string;
-      }
-    | undefined;
   setActiveStep: Dispatch<SetStateAction<number>>;
 }
 
-export function GenerateCards({
-  excelData,
-  nameFile,
-  list,
-  board,
-  setActiveStep,
-}: GenerateCardsProps) {
+export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
   const [loading, setLoading] = useState<boolean>(false);
-  const { setListErros, sheetName } = useErrorsApi();
+  const { setListErros, sheetName, member, list, excelData, nameFile, board } =
+    useGeneralContext();
 
   async function createCard(
     content: string,
@@ -44,17 +25,27 @@ export function GenerateCards({
         additionalTitle !== "" ? `- ${additionalTitle}` : ""
       }`,
     };
-    const reponse = await trelloApi.generateCards(list?.id, data, setListErros);
+    const reponse = await trelloApi.generateCards(
+      member.userName,
+      list?.id,
+      data,
+      setListErros
+    );
     const dueDate = { due: date };
-    await trelloApi.updateCard(reponse.id, dueDate, setListErros);
+    await trelloApi.updateCard(
+      member.userName,
+      reponse.id,
+      dueDate,
+      setListErros
+    );
     await addComment(listComents, reponse.id);
   }
 
   async function addComment(listComents: any, id: string) {
     for (const comment of listComents) {
-      const member = comment.member || "";
-      const text = `${member} ${comment.title} ${comment.content}`;
-      await trelloApi.generateComment(text, id, setListErros);
+      const memberMark = comment.member || "";
+      const text = `${memberMark} ${comment.title} ${comment.content}`;
+      await trelloApi.generateComment(member.userName, text, id, setListErros);
     }
   }
 
@@ -125,7 +116,7 @@ export function GenerateCards({
       );
     }
     setLoading(false);
-    setActiveStep(7);
+    setActiveStep((prev) => prev + 2);
   }
 
   return (
@@ -137,10 +128,14 @@ export function GenerateCards({
         </div>
         <div className="text-xl">
           <div>
+            Usuário que esta criando os cards:{" "}
+            <span className="font-bold">{member.name}</span>
+          </div>
+          <div>
             Quadro: <span className="font-bold">{board?.name}</span>
           </div>
           <div>
-            Lista: <span className="font-bold">{list?.name}</span>
+            Coluna: <span className="font-bold">{list?.name}</span>
           </div>
           <div>
             Nome do arquivo: <span className="font-bold">{nameFile}</span>

@@ -23,7 +23,19 @@ export function SelectList({ setActiveStep }: SelectListProps) {
       (async () => {
         setLoading(true);
         const response = await trelloApi.getLists(member.userName, board.id);
-        setLists(response);
+        const dataFilter: any = response.filter((item: any) => {
+          const uppercase = item.name.toUpperCase();
+          let teste: boolean = false;
+          if (
+            uppercase.includes("BRIEFING") ||
+            uppercase.includes("YOUTUBE") ||
+            uppercase.includes("TIKTOK")
+          ) {
+            teste = true;
+          }
+          return teste;
+        });
+        setLists(dataFilter);
         setLoading(false);
       })();
     }

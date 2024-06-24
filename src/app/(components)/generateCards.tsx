@@ -31,11 +31,15 @@ export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
       data,
       setListErros
     );
+    const uppercase = sheetName.toUpperCase();
+    const verifySheetName = uppercase.includes("LINKEDIN");
+    const cover = { color: "blue", brightness: "light" };
     const dueDate = { due: date };
+    const dataUpdate = verifySheetName ? { cover, dueDate } : { dueDate };
     await trelloApi.updateCard(
       member.userName,
       reponse.id,
-      dueDate,
+      dataUpdate,
       setListErros
     );
     await addComment(listComents, reponse.id);

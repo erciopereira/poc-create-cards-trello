@@ -34,8 +34,10 @@ export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
     const uppercase = sheetName.toUpperCase();
     const verifySheetName = uppercase.includes("LINKEDIN");
     const cover = { color: "blue", brightness: "light" };
-    const dueDate = { due: date };
-    const dataUpdate = verifySheetName ? { cover, dueDate } : { dueDate };
+    const dueDate = date;
+    const dataUpdate = verifySheetName
+      ? { cover, due: dueDate }
+      : { due: dueDate };
     await trelloApi.updateCard(
       member.userName,
       reponse.id,
@@ -75,8 +77,9 @@ export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
             dateTitle = element[item];
             break;
           case "dateRef":
+            const uppercase = sheetName.toUpperCase();
             date = new Date(
-              sheetName === "Linkedin"
+              uppercase === "LINKEDIN"
                 ? `${element[item]} 07:30`
                 : `${element[item]} 08:00`
             );

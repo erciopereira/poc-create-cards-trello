@@ -14,6 +14,11 @@ interface Erros {
   day: string;
 }
 
+interface ProsIdName {
+  id: string | undefined;
+  name: string | undefined;
+}
+
 interface GeneralContextType {
   listErrors: Erros[];
   setListErros: Dispatch<SetStateAction<Erros[]>>;
@@ -21,26 +26,12 @@ interface GeneralContextType {
   setSheetName: Dispatch<SetStateAction<string>>;
   member: { name: string; userName: string };
   setMember: Dispatch<SetStateAction<{ name: string; userName: string }>>;
-  setBoard: Dispatch<
-    SetStateAction<{
-      id: string | undefined;
-      name: string | undefined;
-    }>
-  >;
-  board: {
-    id: string | undefined;
-    name: string | undefined;
-  };
-  setList: Dispatch<
-    SetStateAction<{
-      id: string | undefined;
-      name: string | undefined;
-    }>
-  >;
-  list: {
-    id: string | undefined;
-    name: string | undefined;
-  };
+  setBoard: Dispatch<SetStateAction<ProsIdName>>;
+  board: ProsIdName;
+  setList: Dispatch<SetStateAction<ProsIdName>>;
+  list: ProsIdName;
+  setTags: Dispatch<SetStateAction<ProsIdName[]>>;
+  tags: ProsIdName[];
   setExcelData: Dispatch<any>;
   excelData: any;
   setNameFile: Dispatch<SetStateAction<string | undefined>>;
@@ -66,20 +57,20 @@ interface GeneralContextType {
 const GeneralContext = createContext({} as GeneralContextType);
 
 export function GeneralContextProvider({ children }: { children: ReactNode }) {
-  const [board, setBoard] = useState<{
-    id: string | undefined;
-    name: string | undefined;
-  }>({
+  const [board, setBoard] = useState<ProsIdName>({
     id: undefined,
     name: undefined,
   });
-  const [list, setList] = useState<{
-    id: string | undefined;
-    name: string | undefined;
-  }>({
+  const [list, setList] = useState<ProsIdName>({
     id: undefined,
     name: undefined,
   });
+  const [tags, setTags] = useState<ProsIdName[]>([
+    {
+      id: undefined,
+      name: undefined,
+    },
+  ]);
   const [excelData, setExcelData] = useState<any>(null);
   const [listErrors, setListErros] = useState<Erros[]>([]);
   const [sheetName, setSheetName] = useState<string>("");
@@ -92,6 +83,7 @@ export function GeneralContextProvider({ children }: { children: ReactNode }) {
     { title: "Selecionar usuário", description: "" },
     { title: "Selecionar quadro", description: "" },
     { title: "Selecionar coluna", description: "" },
+    { title: "Selecionar etiqueta", description: "" },
     { title: "Carregar arquivo de excel", description: "" },
     { title: "Selecionar aba do arquivo", description: "" },
     { title: "Dados do arquivo carregado", description: "" },
@@ -113,6 +105,8 @@ export function GeneralContextProvider({ children }: { children: ReactNode }) {
         setBoard,
         list,
         setList,
+        tags,
+        setTags,
         excelData,
         setExcelData,
         setNameFile,

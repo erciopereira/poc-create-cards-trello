@@ -9,8 +9,16 @@ interface GenerateCardsProps {
 
 export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
   const [loading, setLoading] = useState<boolean>(false);
-  const { setListErros, sheetName, member, list, excelData, nameFile, board } =
-    useGeneralContext();
+  const {
+    setListErros,
+    sheetName,
+    member,
+    list,
+    excelData,
+    nameFile,
+    board,
+    tags,
+  } = useGeneralContext();
 
   async function createCard(
     content: string,
@@ -18,11 +26,14 @@ export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
     listComents: string[],
     date: string,
     dateTitle: string,
-    additionalTitle: string
+    additionalTitle: string,
+    additionalTitleSequence: string
   ) {
     const data = {
       name: `${dateTitle} - ${content} ${format !== "" ? `- ${format}` : ""} ${
         additionalTitle !== "" ? `- ${additionalTitle}` : ""
+      } ${
+        additionalTitleSequence !== "" ? `- ${additionalTitleSequence}` : ""
       }`,
     };
     const reponse = await trelloApi.generateCards(
@@ -35,9 +46,10 @@ export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
     const verifySheetName = uppercase.includes("LINKEDIN");
     const cover = { color: "blue", brightness: "light" };
     const dueDate = date;
+    const tagsSelectec = tags.map((item) => item.id);
     const dataUpdate = verifySheetName
-      ? { cover, due: dueDate }
-      : { due: dueDate };
+      ? { cover, due: dueDate, idLabels: tagsSelectec }
+      : { due: dueDate, idLabels: tagsSelectec };
     await trelloApi.updateCard(
       member.userName,
       reponse.id,
@@ -63,6 +75,7 @@ export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
       let date: any = "";
       let dateTitle: string = "";
       let additionalTitle: string = "";
+      let additionalTitleSequence: string = "";
       const listComents: any = [];
       const obj: any = Object.keys(element);
       obj.forEach((item: any) => {
@@ -77,12 +90,21 @@ export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
             dateTitle = element[item];
             break;
           case "dateRef":
-            const uppercase = sheetName.toUpperCase();
-            date = new Date(
-              uppercase === "LINKEDIN"
-                ? `${element[item]} 07:30`
-                : `${element[item]} 08:00`
-            );
+            if (element.Sequência) {
+              if (element.Sequência === "Post 1")
+                date = new Date(`${element[item]} 08:00`);
+              if (element.Sequência === "Post 2")
+                date = new Date(`${element[item]} 13:00`);
+              if (element.Sequência === "Post 3")
+                date = new Date(`${element[item]} 18:00`);
+            } else {
+              const uppercase = sheetName.toUpperCase();
+              date = new Date(
+                uppercase === "LINKEDIN"
+                  ? `${element[item]} 07:30`
+                  : `${element[item]} 08:00`
+              );
+            }
             break;
           case "Considerações Julyana":
           case "Referência de conteúdo":
@@ -109,6 +131,10 @@ export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
               });
             }
             break;
+          case "Sequência":
+            additionalTitleSequence = element[item]
+              ? `${item}: ${element[item]}`
+              : "";
           default:
             break;
         }
@@ -119,7 +145,8 @@ export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
         listComents,
         date,
         dateTitle,
-        additionalTitle
+        additionalTitle,
+        additionalTitleSequence
       );
     }
     setLoading(false);
@@ -143,6 +170,12 @@ export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
           </div>
           <div>
             Coluna: <span className="font-bold">{list?.name}</span>
+          </div>
+          <div>
+            Etiquetas Selecionadas:{" "}
+            <span className="font-bold">
+              {tags.map((item) => item.name).join(", ")}
+            </span>
           </div>
           <div>
             Nome do arquivo: <span className="font-bold">{nameFile}</span>

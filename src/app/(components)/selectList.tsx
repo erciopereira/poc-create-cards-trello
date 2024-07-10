@@ -12,8 +12,8 @@ export function SelectList({ setActiveStep }: SelectListProps) {
   const [lists, setLists] = useState<
     [
       {
-        id: string;
-        name: string;
+        id: "";
+        name: "";
       }
     ]
   >();

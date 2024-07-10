@@ -28,6 +28,16 @@ export default {
     const data = await reponse?.json();
     return data || [];
   },
+  getListTags: async (member: string, idBoard?: string): Promise<any> => {
+    const token = member === "anita" ? tokenAnita : tokenJulyana;
+    const response = await api({
+      path: `/boards/${idBoard}/labels?key=${key}&token=${token}`,
+      method: "GET",
+      type: "Erro etiquetas",
+    });
+    const data = await response?.json();
+    return data || [];
+  },
   generateCards: async (
     member: string,
     idList: string | undefined,

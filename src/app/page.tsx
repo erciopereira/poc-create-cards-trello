@@ -10,6 +10,7 @@ import { SelectList } from "./(components)/selectList";
 import { SelectMembers } from "./(components)/selectMembers";
 import { SelectSheet } from "./(components)/selectSheet";
 import { Stepper } from "./(components)/stepper";
+import { SelectTags } from "./(components)/tags";
 import { UploadFile } from "./(components)/uploadFile";
 
 export default function Home() {
@@ -38,12 +39,13 @@ export default function Home() {
           {activeStep === 0 && <SelectMembers setActiveStep={setActiveStep} />}
           {activeStep === 1 && <SelectBoard setActiveStep={setActiveStep} />}
           {activeStep === 2 && <SelectList setActiveStep={setActiveStep} />}
+          {activeStep === 3 && <SelectTags setActiveStep={setActiveStep} />}
         </div>
-        {activeStep === 3 && <UploadFile setActiveStep={setActiveStep} />}
-        {activeStep === 4 && <SelectSheet setActiveStep={setActiveStep} />}
-        {activeStep === 5 && <ContentView setActiveStep={setActiveStep} />}
-        {activeStep === 6 && <GenerateCards setActiveStep={setActiveStep} />}
-        {activeStep === 8 && <ListErrors />}
+        {activeStep === 4 && <UploadFile setActiveStep={setActiveStep} />}
+        {activeStep === 5 && <SelectSheet setActiveStep={setActiveStep} />}
+        {activeStep === 6 && <ContentView setActiveStep={setActiveStep} />}
+        {activeStep === 7 && <GenerateCards setActiveStep={setActiveStep} />}
+        {activeStep === 9 && <ListErrors />}
       </div>
     </div>
   );

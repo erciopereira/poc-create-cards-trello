@@ -14,8 +14,8 @@ export function SelectBoard({ setActiveStep }: SelectBoardProps) {
   const [listBoards, setListBoards] = useState<
     [
       {
-        id: string;
-        name: string;
+        id: "";
+        name: "";
       }
     ]
   >();

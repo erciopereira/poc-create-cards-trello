@@ -124,7 +124,11 @@ export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
             break;
           case "Referência visual":
             if (element[item] !== "") {
-              const createTitle = `@aquesiafernandes\n\n **${item}:** \n\n`;
+              const verifyMember =
+                member.userName === "julyana"
+                  ? "@aquesiafernandes"
+                  : "@rayanenogueirafilhosnocurriculo";
+              const createTitle = `${verifyMember}\n\n **${item}:** \n\n`;
               listComents.push({
                 title: encodeURIComponent(createTitle),
                 content: encodeURIComponent(element[item]),

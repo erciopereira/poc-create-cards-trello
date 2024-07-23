@@ -107,6 +107,8 @@ export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
             }
             break;
           case "Considerações Julyana":
+          case "Considerações Anita":
+          case "Considerações Time Filhos":
           case "Referência de conteúdo":
           case "Pedidos de CTA específicos":
             if (element[item] !== "") {

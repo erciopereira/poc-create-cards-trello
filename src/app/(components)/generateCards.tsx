@@ -111,7 +111,7 @@ export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
           case "Considerações Time Filhos":
           case "Referência de conteúdo":
           case "Pedidos de CTA específicos":
-          case "Pedidos específicos de CTA?":
+          case "Pedidos específicos de CTA":
             if (element[item] !== "") {
               const createTitle = `**${item}:** \n\n`;
               listComents.push({

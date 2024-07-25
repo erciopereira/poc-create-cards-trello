@@ -126,6 +126,7 @@ export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
             additionalTitle = element[item] ? `${item}: ${element[item]}` : "";
             break;
           case "Referência visual":
+          case "Título da arte":
             if (element[item] !== "") {
               const verifyMember =
                 member.userName === "julyana"

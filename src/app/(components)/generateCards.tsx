@@ -99,11 +99,15 @@ export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
                 date = new Date(`${element[item]} 18:00`);
             } else {
               const uppercase = sheetName.toUpperCase();
-              date = new Date(
-                uppercase === "LINKEDIN"
-                  ? `${element[item]} 07:30`
-                  : `${element[item]} 08:00`
-              );
+              let format = "";
+              if (
+                uppercase === "LINKEDIN" ||
+                uppercase === "LINKEDIN VRS" ||
+                uppercase === "LINKEDIN VIVI"
+              )
+                format = `${element[item]} 07:30`;
+              else format = `${element[item]} 08:00`;
+              date = new Date(format);
             }
             break;
           case "Considerações Julyana":
@@ -130,7 +134,7 @@ export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
             if (element[item] !== "") {
               const verifyMember =
                 member.userName === "julyana"
-                  ? "@aquesiafernandes"
+                  ? ""
                   : "@rayanenogueirafilhosnocurriculo";
               const createTitle = `${verifyMember}\n\n **${item}:** \n\n`;
               listComents.push({

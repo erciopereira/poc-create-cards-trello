@@ -100,13 +100,17 @@ export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
             } else {
               const uppercase = sheetName.toUpperCase();
               let format = "";
-              if (
-                uppercase === "LINKEDIN" ||
-                uppercase === "LINKEDIN VRS" ||
-                uppercase === "LINKEDIN VIVI"
-              )
-                format = `${element[item]} 07:30`;
-              else format = `${element[item]} 08:00`;
+              if (uppercase.includes("REVLON PRO")) {
+                format = `${element[item]} 12:00`;
+              } else {
+                if (
+                  uppercase === "LINKEDIN" ||
+                  uppercase === "LINKEDIN VRS" ||
+                  uppercase === "LINKEDIN VIVI"
+                )
+                  format = `${element[item]} 07:30`;
+                else format = `${element[item]} 08:00`;
+              }
               date = new Date(format);
             }
             break;

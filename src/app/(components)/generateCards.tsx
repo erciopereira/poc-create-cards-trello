@@ -102,7 +102,8 @@ export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
               let format = "";
               if (
                 uppercase.includes("REVLON PRO") ||
-                uppercase.includes("ELIZABETH ARDEN")
+                uppercase.includes("ELIZABETH ARDEN") ||
+                uppercase.includes("REVLON CC")
               ) {
                 format = `${element[item]} 12:00`;
               } else {

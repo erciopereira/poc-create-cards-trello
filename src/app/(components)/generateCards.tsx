@@ -120,6 +120,8 @@ export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
           case "Referência de conteúdo":
           case "Pedidos de CTA específicos":
           case "Pedidos específicos de CTA":
+          case "Texto":
+          case "Legenda":
             if (element[item] !== "") {
               const createTitle = `**${item}:** \n\n`;
               listComents.push({

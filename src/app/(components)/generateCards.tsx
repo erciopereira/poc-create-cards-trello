@@ -100,7 +100,10 @@ export function GenerateCards({ setActiveStep }: GenerateCardsProps) {
             } else {
               const uppercase = sheetName.toUpperCase();
               let format = "";
-              if (uppercase.includes("REVLON PRO")) {
+              if (
+                uppercase.includes("REVLON PRO") ||
+                uppercase.includes("ELIZABETH ARDEN")
+              ) {
                 format = `${element[item]} 12:00`;
               } else {
                 if (
